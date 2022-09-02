@@ -1,0 +1,94 @@
+
+
+0539070524-0036
+http://lims2/siv?sub_image=1144635920&default_range=0,1561,0,10039,0,4095
+http://lims2/siv?sub_image=1144635920&default_range=0,1561,0,10039,0,4095&type=projectionSegmentation
+/allen/programs/celltypes/production/whbi/prod308/0539070524-0036_1144240202/
+\\allen\programs\celltypes\production\whbi\prod308\0539070524-0036_1144240202
+
+/allen/programs/celltypes/production/whbi/prod308/image_series_1144635698/
+\\allen\programs\celltypes\production\whbi\prod308\image_series_1144635698\grid
+
+/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmenter/bin/run_segmentation_module.rb -A 501 1144240202
+<slide>
+  <id type="integer">1144240202</id>
+  <slide-image>0539070524-0036.jp2</slide-image>
+  <segmented-image>0539070524-0036_projection.jp2</segmented-image>
+  <slide-storage-directory>/allen/programs/celltypes/production/whbi/prod308/0539070524-0036_1144240202/</slide-storage-directory>
+  <image-series-storage-directory>/allen/programs/celltypes/production/whbi/prod308/image_series_1144635698/</image-series-storage-directory>
+  <injection-site-polygons type="array"/>
+  <sensitivity-level type="integer">1</sensitivity-level>
+</slide>
+
+/allen/programs/celltypes/production/whbi/prod124/image_series_1144635400
+\\allen\programs\celltypes\production\whbi\prod124\image_series_1144635400\grid
+
+/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmenter/bin/ProjectionSegmenter
+/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmenter/bin/ProjectionSegmenter inputImage outputFile
+
+  Allowed options:
+  --help                          print help message
+  -i [ --inputImage ] arg         input image
+  -b [ --inputBImage ] arg        input Bimage
+  -m [ --inputEstimate ] arg      input estimate
+  -o [ --outputFile ] arg         output image/file
+  -B [ --outputBFile ] arg        output Bimage/file
+  -g [ --inputGrid ] arg          input grid directory
+  -a [ --inputRegionXml ] arg     input regionxml
+  -s [ --inputsenslevelfile ] arg input sensitivitylevel file
+  -d [ --disk ] arg               disk partion for image_series
+  -l [ --lossless ]               write lossless JP2
+  -n [ --normalization ]          normalize intensity
+  -N [ --nodownsample ]           No downsample
+  -1 [ --onepass ]                1-pass processing
+  -e [ --estimatefromfullonly ]   estimate section peaks
+  -E [ --estimatefromgridonly ]   estimate all middle section peaks from grid
+                                  only
+  -M [ --estimatefromgrid ]       apply peaks from grid
+  -r [ --bitrate ] arg            target JP2 bitrate
+  -R [ --rpeak ] arg              section Rpeak
+  -G [ --gpeak ] arg              section Gpeak
+  -S [ --sensitivitylevel ] arg   sensitivityLevel setting
+  -c [ --Aim5_OP_code ] arg       Aim5_OP_code setting
+  -A [ --Aim ] arg                processAim (1(default),3, 40(Rsoma), 41(G), 5
+  -D [ --sectionDepth ] arg       sectionDepth (40 or 90)
+  -f [ --ftroutput ]              output features
+  -t [ --trainingMode ]           png and features for traning
+  -F [ --NOpostfilter ]           NOT perform post filtering
+
+
+  http://stash.corp.alleninstitute.org/projects/TECH/repos/lims/browse/lib/aibs/module_support/projects/connectivity/modules/tcprojectionsegmentation.rb
+  
+        slide_image = root.elements["slide-image"]
+        segmented_image = root.elements["segmented-image"]
+        slide_directory = root.elements["slide-storage-directory"]
+        image_series_directory = root.elements["image-series-storage-directory"]
+        injection_polygon_xml = root.elements["injection-site-polygons"]
+        sensitivity_level = root.elements["sensitivity-level"]
+ 
+slide_path = File.join(slide_directory, slide_image)
+grid_directory = File.join(image_series_directory, "grid")
+output_image_file = File.join(output_directory, segmented_image)
+sensitivity_level = sensitivity_level.text
+
+      # Assemble command line parameters
+      args = []
+      params[:other_args].each { |arg| args << arg }
+      args << "-n" << "-M" << "-1"  # -n: normalize intensity, -M estimate from grid, -1: single pass processing
+      args << "-i" << slide_path
+      args << "-o" << output_image_file
+      args << "-g" << grid_directory
+      args << "-a" << module_input_file
+      args << "-S" << sensitivity_level
+
+call CVdetect_Gsoma variation for Aim5
+Aim5_OP_code=30
+OP_mode 3 sensitivity_offset 3
+ 
+//  OP_mode = 3 :  30 <= sensitivityLevel <=35, all signal detection mode, default 30
+//  OP_mode = 2 :  20 <= sensitivityLevel <=25, strong singnal detection mode
+//  OP_mode = 1 :  10 <= sensitivityLevel <=15, within-DOF cell detection mode
+
+/allen/programs/celltypes/production/whbi/prod315/image_series_1158999274/
+\\allen\programs\celltypes\production\whbi\prod315\image_series_1158999274
+
