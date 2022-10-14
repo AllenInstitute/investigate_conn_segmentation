@@ -11,12 +11,22 @@ import pandas as pd
 # Load jp2 and scale green channel
 #===============================================================================
 def rescale_jp2(inputfile, g_scale, r_scale, outputfile) :
-      
+     
+    scale = 3
+    
     jp2 = glymur.Jp2k(inputfile)
     fullres = jp2[:]
     fullres[:,:,0] = np.around(np.multiply( fullres[:,:,0], r_scale))
-    fullres[:,:,1] = np.around(np.multiply( fullres[:,:,1], g_scale))
- 
+    
+    if g_scale < 1:
+        fullres[:,:,1] = np.around(np.multiply( fullres[:,:,1], g_scale))
+    else:
+        g_denom = np.max(fullres[:, :, 1]) / scale
+        g_scale = np.exp(fullres[:, :, 1] / g_denom) - 1
+        g_norm = (g_scale - np.min(g_scale)) / (np.max(g_scale) - np.min(g_scale)) * 65535
+        
+        fullres[:, :, 1] = np.around(g_norm)
+        
     glymur.Jp2k(outputfile, fullres)
 
 #===============================================================================
@@ -28,7 +38,7 @@ def batch_rescale(output_directory, scale) :
     number_of_cores = int(os.environ['SLURM_CPUS_PER_TASK'])
     glymur.set_option('lib.num_threads', number_of_cores)
    
-    path_file = os.path.join(output_directory, 'image_paths.csv' )
+    path_file = os.path.join(output_directory, 'image_paths.csv')
     paths = pd.read_csv( path_file )
 
     for pindex, prow in paths.iterrows() :

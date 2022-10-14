@@ -13,7 +13,7 @@ def rescale_grid( inputfile, scale, outputfile ) :
     output = sitk.Multiply( output, scale )
     output = sitk.Cast( output, sitk.sitkUInt16 )
 
-    sitk.WriteImage( output, outputfile )
+    sitk.WriteImage(output, outputfile)
 
     
 def initialize_connection() :
