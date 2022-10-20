@@ -15,7 +15,7 @@ from rescale_grid import *
 
 # temp for during dev off of the hpc
 # possibly want to remove "root" variable later
-if socket.gethostname() == 'OSXLTSDQ05P':
+if socket.gethostname() == 'OSXLTQMY7CK':
     root = '/Users/nicholas.lusk'
 else:
     root = ''
@@ -32,7 +32,7 @@ module_path = "/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmen
 # the path to the input .xlsx file and directory to where the reprocessed data will be saved
 # currently the input_file needs two columns: ['image_series_id', 'method']
     # method (str): 'high_green' or 'low_green
-input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/boaz_seg_subset.xlsx'
+input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/Boaz_reseg.xlsx'
 base_directory = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/output'
 
 #==============================================================================
@@ -77,10 +77,10 @@ for iindex, irow in df.iterrows() :
         channel_scale[channel_opts[1]] = 0.3
     elif irow['method'] == "low_green" :
         # rescale intensity for "low green" cases (<1500)
-        channel_scale[channel_opts[1]] = 1.0
-    elif irow['method'] == "very_low_green" :
-        # rescale intensity for "low green" cases (<1500)
         channel_scale[channel_opts[1]] = 2.0
+    elif irow['method'] == 'rerun':
+        # used for simply rerunning when masks are missing
+        channel_scale[channel_opts[1]] = 1.0
         
 
     for c in channel_scale :
