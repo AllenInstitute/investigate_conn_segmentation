@@ -32,7 +32,7 @@ module_path = "/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmen
 # the path to the input .xlsx file and directory to where the reprocessed data will be saved
 # currently the input_file needs two columns: ['image_series_id', 'method']
     # method (str): 'high_green' or 'low_green
-input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/Boaz_reseg.xlsx'
+input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/brains_seg_subset.xlsx'
 base_directory = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/output'
 
 #==============================================================================
@@ -82,7 +82,6 @@ for iindex, irow in df.iterrows() :
         # used for simply rerunning when masks are missing
         channel_scale[channel_opts[1]] = 1.0
         
-
     for c in channel_scale :
         input_file = root + os.path.join( input_grid_directory, c )
         output_file = root + os.path.join( output_grid_directory, c )
@@ -93,6 +92,9 @@ for iindex, irow in df.iterrows() :
     path_file = os.path.join( output_directory, 'image_paths.csv' )
     paths = get_image_full_local_paths( image_series_id, conn )
     paths.to_csv( root + path_file, index=False )
+    
+    # get info on mask
+    channel_scale['mask'] = irow['mask']
     
     #==========================================================================
     # Create slurm batch file for running rescaling 
@@ -123,7 +125,8 @@ for iindex, irow in df.iterrows() :
         line += 'cd ' + script_base + '\n'
         line += 'python -m batch_rescale_jp2 '
         line += str( output_directory ) + ' '
-        line += str(channel_scale[channel_opts[1]]) + ' ' + str(channel_scale[channel_opts[0]]) 
+        line += str(channel_scale[channel_opts[1]]) + ' ' + str(channel_scale[channel_opts[0]]) + ' '
+        line += str(channel_scale['mask'])
         file.write(line)
 
     #==========================================================================
