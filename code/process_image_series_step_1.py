@@ -93,8 +93,9 @@ for iindex, irow in df.iterrows() :
     paths = get_image_full_local_paths( image_series_id, conn )
     paths.to_csv( root + path_file, index=False )
     
-    # get info on mask
+    # get info on mask and tessellation
     channel_scale['mask'] = irow['mask']
+    channel_scale['tessellation'] = irow['tessellation']
     
     #==========================================================================
     # Create slurm batch file for running rescaling 
