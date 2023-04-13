@@ -5,16 +5,27 @@ import pandas as pd
 import SimpleITK as sitk
 import json
     
-def rescale_grid( inputfile, scale, outputfile ) :
+def rescale_grid( inputfile, scale, outputfile, flip, enu) :
+    
+    options = ['red_22.4.mhd',
+               'green_22.4.mhd']
+    
+    input = sitk.ReadImage(inputfile)
 
-    input = sitk.ReadImage( inputfile )
-
-    output = sitk.Cast( input, sitk.sitkFloat32 )
-    output = sitk.Multiply( output, scale )
-    output = sitk.Cast( output, sitk.sitkUInt16 )
-
+    output = sitk.Cast(input, sitk.sitkFloat32)
+    output = sitk.Multiply( output, scale)
+    output = sitk.Cast(output, sitk.sitkUInt16)
+    
+    if flip:
+        base = os.path.dirname(outputfile)
+        if enu == 0:
+            outputfile = os.path.join(base, options[1])
+        else:
+            outputfile = os.path.join(base, options[0])
+    else:
+        print('did not flip')
+            
     sitk.WriteImage(output, outputfile)
-
     
 def initialize_connection() :
     conn = psycopg2.connect("host=limsdb3 dbname=lims2 user=atlasreader password=atlasro")

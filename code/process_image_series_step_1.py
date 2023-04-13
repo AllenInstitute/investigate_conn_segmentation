@@ -16,7 +16,7 @@ from rescale_grid import *
 # temp for during dev off of the hpc
 # possibly want to remove "root" variable later
 if socket.gethostname() == 'OSXLTQMY7CK':
-    root = '/Users/nicholas.lusk'
+    root = '/Users/nicholas.lusk/allen'
 else:
     root = ''
 
@@ -32,7 +32,7 @@ module_path = "/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmen
 # the path to the input .xlsx file and directory to where the reprocessed data will be saved
 # currently the input_file needs two columns: ['image_series_id', 'method']
     # method (str): 'high_green' or 'low_green
-input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/brains_seg_subset.xlsx'
+input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/shenqin_run_3.xlsx'
 base_directory = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/output'
 
 #==============================================================================
@@ -67,35 +67,58 @@ for iindex, irow in df.iterrows() :
                        os.path.basename(glob(os.path.join(root + input_grid_directory, 'green_2*.mhd'))[0])]
     
     channel_scale = {}
-    channel_scale[channel_opts[0]] = 1.0
     
-    if irow['method'] == "very_high_green" :
+    
+    # green and red need to be modified independently
+    if irow['g_method'] == "very_high_green" :
         # Rescale intensity for "very high green" cases (10000+)
         channel_scale[channel_opts[1]] = 0.2
-    elif irow['method'] == "high_green" :
+    elif irow['g_method'] == "high_green" :
         # Rescale intensity for "high green" cases (9999-3000)
         channel_scale[channel_opts[1]] = 0.3
-    elif irow['method'] == "low_green" :
+    elif irow['g_method'] == "mid_green" :
+        # Rescale intensity for "high green" cases (9999-3000)
+        channel_scale[channel_opts[1]] = 0.5
+    elif irow['g_method'] == "low_green" :
         # rescale intensity for "low green" cases (<1500)
         channel_scale[channel_opts[1]] = 2.0
-    elif irow['method'] == 'rerun':
+    elif irow['g_method'] == 'rerun':
         # used for simply rerunning when masks are missing
         channel_scale[channel_opts[1]] = 1.0
         
-    for c in channel_scale :
+    if irow['r_method'] == 'very_high_red':
+        channel_scale[channel_opts[0]] = 0.2
+    elif irow['r_method'] == 'high_red':
+        channel_scale[channel_opts[0]] = 0.3
+    elif irow['r_method'] == 'mid_red':
+        channel_scale[channel_opts[0]] = 0.5
+    elif irow['r_method'] == "low_red" :
+        channel_scale[channel_opts[0]] = 2.0
+    elif irow['r_method'] == 'rerun':
+        channel_scale[channel_opts[0]] = 1.0
+        
+    
+    for enu, c in enumerate(channel_scale):
         input_file = root + os.path.join( input_grid_directory, c )
         output_file = root + os.path.join( output_grid_directory, c )
-        rescale_grid(input_file, channel_scale[c], output_file )
+        rescale_grid(input_file, channel_scale[c], output_file, irow['flip'], enu)
 
 
     # Query LIMS for jp2 image path and write to file
     path_file = os.path.join( output_directory, 'image_paths.csv' )
-    paths = get_image_full_local_paths( image_series_id, conn )
+    paths = get_image_full_local_paths( image_series_id, conn)
+    
+    
+    # to speed up testing only take 1/5 of the dataset
+    if irow['test']:
+        paths = paths.iloc[::5, :]
+        
     paths.to_csv( root + path_file, index=False )
     
     # get info on mask and tessellation
     channel_scale['mask'] = irow['mask']
-    channel_scale['tessellation'] = irow['tessellation']
+    channel_scale['tesselation'] = irow['tesselation']
+    channel_scale['flip'] = irow['flip']
     
     #==========================================================================
     # Create slurm batch file for running rescaling 
@@ -109,7 +132,7 @@ for iindex, irow in df.iterrows() :
         job_settings = [
             '#!/bin/bash\n',
             '#SBATCH --partition=celltypes\n',
-            '#SBATCH --nodes=1 --cpus-per-task=16 --mem=32G\n',
+            '#SBATCH --nodes=1 --cpus-per-task=16 --mem=128G\n',
             '#SBATCH --time=10:00:00\n',
             '#SBATCH --export=NONE\n',
             '#SBATCH --mail-type=NONE\n']
@@ -127,7 +150,7 @@ for iindex, irow in df.iterrows() :
         line += 'python -m batch_rescale_jp2 '
         line += str( output_directory ) + ' '
         line += str(channel_scale[channel_opts[1]]) + ' ' + str(channel_scale[channel_opts[0]]) + ' '
-        line += str(channel_scale['mask'])
+        line += str(channel_scale['mask']) + ' ' + str(channel_scale['tesselation']) + ' ' + str(channel_scale['flip']) 
         file.write(line)
 
     #==========================================================================
@@ -142,7 +165,7 @@ for iindex, irow in df.iterrows() :
         job_settings = [
             '#!/bin/bash\n',
             '#SBATCH --partition=celltypes\n',
-            '#SBATCH --nodes=1 --cpus-per-task=1 --mem=16G\n',
+            '#SBATCH --nodes=1 --cpus-per-task=1 --mem=32G\n',
             '#SBATCH --time=5:00:00\n',
             '#SBATCH --export=NONE\n',
             '#SBATCH --mail-type=NONE\n',
@@ -175,7 +198,7 @@ for iindex, irow in df.iterrows() :
         job_settings = [
             '#!/bin/bash\n',
             '#SBATCH --partition=celltypes\n',
-            '#SBATCH --nodes=1 --cpus-per-task=1 --mem=16G\n',
+            '#SBATCH --nodes=1 --cpus-per-task=1 --mem=32G\n',
             '#SBATCH --time=5:00:00\n',
             '#SBATCH --export=NONE\n',
             '#SBATCH --mail-type=NONE\n',
@@ -211,7 +234,7 @@ for iindex, irow in df.iterrows() :
         job_settings = [
             '#!/bin/bash\n',
             '#SBATCH --partition=celltypes\n',
-            '#SBATCH --nodes=1 --cpus-per-task=8 --mem=64G\n',
+            '#SBATCH --nodes=1 --cpus-per-task=8 --mem=128G\n',
             '#SBATCH --time=10:00:00\n',
             '#SBATCH --export=NONE\n',
             '#SBATCH --mail-type=NONE\n']
