@@ -5,7 +5,7 @@ import pandas as pd
 import SimpleITK as sitk
 import json
     
-def rescale_grid( inputfile, scale, outputfile, flip, enu) :
+def rescale_grid(inputfile, scale, outputfile, flip, enu) :
     
     options = ['red_22.4.mhd',
                'green_22.4.mhd']
@@ -132,7 +132,7 @@ def module_command( module_path, input_file, grid_directory, output_file ) :
     return line
     
     
-def modify_grid_json( input_json, output_directory, output_json ) :
+def modify_grid_json(input_json, output_directory, output_json, ch = None) :
 
     # Read input json
     with open( input_json, "r" ) as file :
@@ -148,27 +148,45 @@ def modify_grid_json( input_json, output_directory, output_json ) :
     for si in slist :
                 
         bname = os.path.basename( si['segmentation_paths']['segmentation'] )
-        si['segmentation_paths']['segmentation'] = os.path.join( output_directory, 'segmentation', bname )
+        
+        # addition for when doing dual channel
+        if not isinstance(ch, type(None)):
+            bname = bname[:-4] + "_" + ch + bname[-4:]
+            si['segmentation_paths']['segmentation'] = os.path.join( output_directory, 'segmentation_' + ch, bname)
+        else:
+            si['segmentation_paths']['segmentation'] = os.path.join( output_directory, 'segmentation', bname)
 
     # Write output json
     with open( output_json, "w" ) as file :
         json.dump( data, file, indent = 4 )
         
         
-def modify_unionize_json( input_json, output_directory, output_json ) :
+def modify_unionize_json(input_json, output_directory, output_json, ch = None) :
 
     # Read input json
-    with open( input_json, "r" ) as file :
+    with open(input_json, "r" ) as file :
         data = json.load( file )
         
     glist = data['grid_paths']
     
     for g in glist :
         bname = os.path.basename( glist[g] )
-        if '_intensities' in g or '_pixels' in g:
-            glist[g] = os.path.join( output_directory, 'grid', 'accumulators', bname )
-        else :
-            glist[g] = os.path.join( output_directory, 'grid', bname )
+        
+        # addition for when doing dual channel
+        if not isinstance(ch, type(None)):
+            
+            ch_name = bname[:-5] + "_" + ch + bname[-5:]
+            
+            if '_intensities' in g or '_pixels' in g:
+                glist[g] = os.path.join(output_directory, 'grid', 'accumulators_' + ch, bname)
+            else :
+                glist[g] = os.path.join(output_directory, 'grid', 'nrrd_' + ch, ch_name )
+        else:
+        
+            if '_intensities' in g or '_pixels' in g:
+                glist[g] = os.path.join(output_directory, 'grid', 'accumulators', bname )
+            else :
+                glist[g] = os.path.join(output_directory, 'grid', bname )
        
 
     # Write output json

@@ -32,7 +32,7 @@ module_path = "/shared/bioapps/infoapps/lims2_modules/mouseconn/ProjectionSegmen
 # the path to the input .xlsx file and directory to where the reprocessed data will be saved
 # currently the input_file needs two columns: ['image_series_id', 'method']
     # method (str): 'high_green' or 'low_green
-input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/shenqin_run_3.xlsx'
+input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/enhancers_Yoav_3.xlsx'
 base_directory = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/output'
 
 #==============================================================================
@@ -40,7 +40,7 @@ base_directory = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging
 #==============================================================================
 df = pd.read_excel(root + input_file)
 
-for iindex, irow in df.iterrows() :
+for iindex, irow in df.iterrows():
 
     image_series_id = irow['image_series_id']
 
@@ -99,8 +99,8 @@ for iindex, irow in df.iterrows() :
         
     
     for enu, c in enumerate(channel_scale):
-        input_file = root + os.path.join( input_grid_directory, c )
-        output_file = root + os.path.join( output_grid_directory, c )
+        input_file = root + os.path.join(input_grid_directory, c )
+        output_file = root + os.path.join(output_grid_directory, c )
         rescale_grid(input_file, channel_scale[c], output_file, irow['flip'], enu)
 
 
