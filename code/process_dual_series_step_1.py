@@ -45,7 +45,7 @@ conn = rg.initialize_connection()
 #==============================================================================
 df = pd.read_excel(root + input_file)
 channels = ['red', 'green']
-std = 4
+std = 2
 
 for iindex, irow in df.iterrows():
     
