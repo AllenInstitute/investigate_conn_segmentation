@@ -34,7 +34,7 @@ script_base = "/allen/programs/celltypes/workgroups/mct-t200/ViralCore/Nick_Lusk
 
 
 # the path to the input .xlsx file and directory to where the reprocessed data will be saved
-input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/enhancers_dual_arber_3.xlsx'
+input_file = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/input/dual_test.xlsx'
 base_directory = '/allen/programs/celltypes/workgroups/mousecelltypes/wb_imaging/tc_reprocess/output/Dual_channel'
 
 # create LIMS connection
